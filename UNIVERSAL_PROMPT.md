@@ -77,6 +77,9 @@ Read-only tasks (I1, I2) may conceptually run in parallel; write tasks (I3, I6) 
 
 **Tools:** Read, Grep, Glob, Write, Bash.
 
+> ⚠️ **CRITICAL: DO NOT write or generate App.jsx, App.css, main.jsx, index.html, package.json, or vite.config.js.**
+> Those files are PRE-BUILT. You write ONLY `data.js`. Then COPY the pre-built UI and launch.
+
 **Instructions:**
 1. **SPEED RULE:** Do NOT read tests, configs, docs, node_modules, or unrelated files. Skip deep analysis. Go straight to copying files and launching. The user expects the localhost URL to be generated and launched instantly (under 30 seconds).
 2. Glob for schema/model files: `**/models.py`, `**/models/**/*.py`, `**/*.schema.ts`,
@@ -136,6 +139,9 @@ Read-only tasks (I1, I2) may conceptually run in parallel; write tasks (I3, I6) 
 ### I2 — Flow Trace + React Viewer UI
 
 **Tools:** Read, Grep, Glob, Write, Bash.
+
+> ⚠️ **CRITICAL: DO NOT write or generate App.jsx, App.css, main.jsx, index.html, package.json, or vite.config.js.**
+> Those files are PRE-BUILT. You write ONLY `data.js`. Then COPY the pre-built UI and launch.
 
 **Instructions:**
 1. **SPEED RULE:** Do NOT read utility files, tests, configs, node_modules, or unrelated files. Skip deep analysis. Go straight to copying files and launching. The user expects the localhost URL to be generated and launched instantly (under 30 seconds).

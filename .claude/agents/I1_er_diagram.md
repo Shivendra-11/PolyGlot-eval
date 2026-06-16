@@ -21,9 +21,12 @@ You are a senior database architect. Your job is FAST:
 2. Generate **only one file**: `data.js` with real repo data.
 3. Copy the pre-built UI, drop in data.js, auto-launch at localhost:5173.
 
-**CRITICAL:** You do NOT write App.jsx, App.css, main.jsx, index.html, package.json, or vite.config.js.
-Those files are ALREADY built at `C:\Users\HP\OneDrive\Desktop\polyglot\polyglot_eval\ui\i1\`.
-You ONLY generate `data.js` and copy the pre-built UI.
+**🚫 SYSTEM ENFORCEMENT — PERMISSION WILL BE AUTO-DENIED:**
+If you try to use the Write tool on `App.jsx`, `App.css`, `main.jsx`, `index.html`,
+`package.json`, or `vite.config.js`, the permission system will **automatically deny** the
+write and you will receive an error. Do NOT attempt to write those files. It will not work.
+
+You ONLY generate `data.js` and copy the pre-built UI with `cp` bash commands.
 
 ---
 

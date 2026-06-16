@@ -38,6 +38,15 @@ _HARD_DENY_PATTERNS: list[re.Pattern] = [
     re.compile(r"\btwine\s+upload\b"),
 ]
 
+# UI component files that I1/I2 agents must NEVER write — they are pre-built.
+# Only `data.js` is allowed to be created/modified in those tasks.
+_UI_READONLY_FILES = {
+    "App.jsx", "App.css", "main.jsx",
+    "index.html", "package.json", "vite.config.js",
+}
+# Task IDs that have pre-built UIs the agent must not recreate.
+_PREBUILT_UI_TASKS = {"I1", "I2"}
+
 # Bash sub-commands that are safe to allow without gating (read-only git/fs ops)
 _SAFE_BASH_PATTERNS: list[re.Pattern] = [
     re.compile(r"^(ls|cat|head|tail|find|echo|pwd|which|git (status|diff|log|branch|show))"),
@@ -58,6 +67,30 @@ def _is_hard_denied(tool_name: str, tool_input: dict) -> bool:
     if tool_name == _BASH_TOOL:
         cmd = tool_input.get("command", tool_input.get("input", ""))
         return any(p.search(cmd) for p in _HARD_DENY_PATTERNS)
+    return False
+
+
+def _is_prebuilt_ui_write(tool_name: str, tool_input: dict, task_id: str) -> bool:
+    """Return True if the agent is trying to write a pre-built UI file it must not touch.
+
+    For I1/I2 tasks the React UI is pre-built at polyglot_eval/ui/i1 and i2/.
+    The agent is only allowed to write data.js; all other UI files are read-only.
+    """
+    if task_id not in _PREBUILT_UI_TASKS:
+        return False
+    if tool_name in _WRITE_TOOLS:
+        # Check by the basename of the file being written
+        path = tool_input.get("file_path", tool_input.get("path", ""))
+        basename = Path(path).name if path else ""
+        if basename in _UI_READONLY_FILES:
+            return True
+    if tool_name == _BASH_TOOL:
+        cmd = tool_input.get("command", tool_input.get("input", ""))
+        # Block any bash command that writes one of the protected files
+        # (e.g. `echo ... > App.jsx` or `tee App.jsx`)
+        for fname in _UI_READONLY_FILES:
+            if fname in cmd and (">>" in cmd or ">" in cmd or "tee" in cmd):
+                return True
     return False
 
 
@@ -82,7 +115,7 @@ def _prompt_operator(tool_name: str, tool_input: dict) -> bool:
     return answer in {"y", "yes"}
 
 
-def make_permission_handler(autonomy: Autonomy, repo: Path) -> Callable:
+def make_permission_handler(autonomy: Autonomy, repo: Path, task_id: str = "") -> Callable:
     """Return a can_use_tool callback for the given autonomy mode.
 
     The callback signature matches what Claude Agent SDK expects:
@@ -104,6 +137,19 @@ def make_permission_handler(autonomy: Autonomy, repo: Path) -> Callable:
                 reason=f"Hard-denied: '{cmd}' matches a destructive pattern "
                        f"(git push, git commit, rm -rf, docker push, etc.) "
                        f"that polyglot-eval never allows."
+            )
+
+        # Pre-built UI guard — I1 and I2 only
+        if _is_prebuilt_ui_write(tool_name, tool_input, task_id):
+            path = tool_input.get("file_path", tool_input.get("path", ""))
+            basename = Path(path).name if path else tool_input.get("command", "")
+            return PermissionResultDeny(
+                reason=(
+                    f"Pre-built UI guard: You tried to write '{basename}', but that file "
+                    f"is PRE-BUILT for task {task_id} and must NOT be recreated. "
+                    f"You are only allowed to write 'data.js'. "
+                    f"Copy the pre-built UI with 'cp' commands instead."
+                )
             )
 
         if autonomy == Autonomy.DRYRUN:

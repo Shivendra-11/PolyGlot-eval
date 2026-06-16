@@ -82,7 +82,7 @@ async def _run_single_task(
         )
 
     start = datetime.now()
-    permission_handler = make_permission_handler(autonomy, repo)
+    permission_handler = make_permission_handler(autonomy, repo, task_id=spec.id)
 
     print(f"\n{'='*60}")
     print(f"  Running {spec.id}: {spec.title}")
