@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polyglot-eval"
+version = "0.1.0"
+description = "A repo-agnostic AI agent that runs the Intermediate engineering eval tasks (I1-I6) using the Claude Agent SDK."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+]
+
+[project.optional-dependencies]
+sdk = [
+    "claude-agent-sdk>=0.1.0",
+]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+polyglot-eval = "polyglot_eval.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["polyglot_eval*"]
