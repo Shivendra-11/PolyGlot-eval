@@ -78,14 +78,15 @@ Read-only tasks (I1, I2) may conceptually run in parallel; write tasks (I3, I6) 
 **Tools:** Read, Grep, Glob, Write, Bash.
 
 **Instructions:**
-1. Glob for schema/model files: `**/models.py`, `**/models/**/*.py`, `**/*.schema.ts`,
+1. **SPEED RULE:** Do NOT read tests, configs, docs, node_modules, or unrelated files. Skip deep analysis. Go straight to copying files and launching. The user expects the localhost URL to be generated and launched instantly (under 30 seconds).
+2. Glob for schema/model files: `**/models.py`, `**/models/**/*.py`, `**/*.schema.ts`,
    `**/schema.prisma`, `**/*.entity.ts`, `**/entities/**/*.java`, `**/*.sql`, `**/migrations/**`.
-2. Grep for: `@Entity`, `@Table`, `class.*Model`, `Base =`, `db.Model`, `schema(`,
+3. Grep for: `@Entity`, `@Table`, `class.*Model`, `Base =`, `db.Model`, `schema(`,
    `createTable`, `models.define`.
-3. Read all relevant files. Extract every entity/table, its columns, PKs, and FK relationships.
-4. Label inferred FK relationships (naming-convention-based) as "inferred".
-5. Build a Mermaid `erDiagram`. Validate it mentally.
-6. Write **exactly one file**: `reports/artifacts/I1/ui/src/data.js` containing the extracted data:
+4. Read ONLY the matched files. Extract every entity/table, its columns, PKs, and FK relationships.
+5. Label inferred FK relationships (naming-convention-based) as "inferred".
+6. Build a Mermaid `erDiagram`. Validate it mentally.
+7. Write **exactly one file**: `reports/artifacts/I1/ui/src/data.js` containing the extracted data:
    ```js
    export const erData = {
      repoName: "<actual repo name>",
@@ -137,15 +138,16 @@ Read-only tasks (I1, I2) may conceptually run in parallel; write tasks (I3, I6) 
 **Tools:** Read, Grep, Glob, Write, Bash.
 
 **Instructions:**
-1. Find the entry point: look for router registrations, `@app.get/post`, `addEventListener`,
+1. **SPEED RULE:** Do NOT read utility files, tests, configs, node_modules, or unrelated files. Skip deep analysis. Go straight to copying files and launching. The user expects the localhost URL to be generated and launched instantly (under 30 seconds).
+2. Find the entry point: look for router registrations, `@app.get/post`, `addEventListener`,
    `@MessageMapping`, `consumer.subscribe`, `main()`.
-2. If the user specified an endpoint/function, start there. Otherwise auto-detect.
-3. Follow the call chain file by file. Grep for function definitions. Read each file.
-4. At every step, note: file path, function/method name, what it does.
-5. Identify all external I/O: DB queries, HTTP calls, queue messages, file writes, cache ops.
-6. Note any dynamic dispatch or uncertainty explicitly.
-7. Build a Mermaid `sequenceDiagram`. Validate it.
-8. Write **exactly one file**: `reports/artifacts/I2/ui/src/data.js` containing the trace data:
+3. If the user specified an endpoint/function, start there. Otherwise auto-detect.
+4. Follow the call chain file by file. Grep for function definitions. Read each file.
+5. At every step, note: file path, function/method name, what it does.
+6. Identify all external I/O: DB queries, HTTP calls, queue messages, file writes, cache ops.
+7. Note any dynamic dispatch or uncertainty explicitly.
+8. Build a Mermaid `sequenceDiagram`. Validate it.
+9. Write **exactly one file**: `reports/artifacts/I2/ui/src/data.js` containing the trace data:
    ```js
    export const traceData = {
      repoName: "<actual repo name>",
