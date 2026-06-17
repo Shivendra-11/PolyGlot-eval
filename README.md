@@ -71,8 +71,8 @@ polyglot-eval deploy-ui --repo /path/to/your-repo
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_ORG/polyglot-builder.git
-cd polyglot-builder
+git clone https://github.com/Shivendra-11/PolyGlot-eval.git
+cd PolyGlot-eval
 
 # Create a virtual environment (recommended)
 python3 -m venv .venv
@@ -178,7 +178,7 @@ Subcommands:
 ## Project structure
 
 ```
-polyglot-builder/
+PolyGlot-eval/
 ├── polyglot_eval/
 │   ├── cli.py                 # Entry point
 │   ├── orchestrator.py        # Task runner
