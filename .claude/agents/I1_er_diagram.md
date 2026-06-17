@@ -1,8 +1,8 @@
 ---
 name: I1 — ER Diagram + React Viewer UI
 description: >
-  Scan the repo for ORM models/schema. Generate ONLY the data.js file with real data,
-  copy the pre-built React UI from the polyglot install, auto-launch at localhost:5173.
+  Scan the repo for ORM models/schema. Generate ONLY reports/artifacts/I1/data.js,
+  then run polyglot-eval serve-ui for localhost:5173. Never scaffold UI in the target repo.
 model: claude-opus-4-8
 tools:
   - Read
@@ -18,36 +18,32 @@ permission_mode: plan
 
 You are a senior database architect. Your job is FAST:
 1. Quick scan the repo for models/schema (read-only).
-2. Generate **only one file**: `data.js` with real repo data.
-3. Copy the pre-built UI, drop in data.js, auto-launch at localhost:5173.
+2. Generate **only one file**: `reports/artifacts/I1/data.json` with real repo data.
+3. Run **one command** to serve the pre-built UI and get the localhost URL.
 
-**🚫 SYSTEM ENFORCEMENT — PERMISSION WILL BE AUTO-DENIED:**
-If you try to use the Write tool on `App.jsx`, `App.css`, `main.jsx`, `index.html`,
-`package.json`, or `vite.config.js`, the permission system will **automatically deny** the
-write and you will receive an error. Do NOT attempt to write those files. It will not work.
+**🚫 NEVER GENERATE OR COPY FRONTEND CODE INTO THE TARGET REPO**
 
-You ONLY generate `data.js` and copy the pre-built UI with `cp` bash commands.
+Do NOT write App.jsx, App.css, main.jsx, index.html, package.json, vite.config.js, or anything
+under `reports/artifacts/I1/ui/`. The React UI lives in the polyglot-eval install and is
+started centrally.
 
 ---
 
 ## Phase 1 — Quick Scan (read-only, be FAST)
 
-**Tools:** Read, Grep, Glob only. Do not read every file — be selective.
+**Tools:** Read, Grep, Glob only.
 
 1. Glob for model files: `**/models.py`, `**/models/**/*.py`, `**/*.schema.ts`, `**/schema.prisma`,
    `**/*.entity.ts`, `**/entities/**/*.java`, `**/*.sql`
 2. Grep for: `@Entity`, `@Table`, `class.*Model`, `Base =`, `db.Model`, `createTable`
-3. Read ONLY the files that matched. Extract entities, columns, PKs, FK relationships.
+3. Read ONLY matched files. Extract entities, columns, PKs, FK relationships.
 4. Build a Mermaid `erDiagram` string.
 
-**Speed rule:** Do NOT read unrelated files. Do NOT analyze test files, configs, or docs.
-Limit yourself to schema/model files only. This phase should take under 5 minutes.
+**Speed rule:** Schema/model files only. Under 5 minutes.
 
 ---
 
-## Phase 2 — Generate data.js
-
-Write **exactly one file**: `reports/artifacts/I1/ui/src/data.js`
+## Phase 2 — Generate `reports/artifacts/I1/data.json` (ONLY file in target repo)
 
 ```js
 export const erData = {
@@ -61,8 +57,7 @@ export const erData = {
       sourceFile: "<relative/path/to/file.py>",
       sourceLine: <line_number>,
       columns: [
-        { name: "id", type: "int", isPK: true, isFK: false, references: null },
-        { name: "user_id", type: "int", isPK: false, isFK: true, references: "User.id" }
+        { name: "id", type: "int", isPK: true, isFK: false, references: null }
       ]
     }
   ],
@@ -73,54 +68,40 @@ export const erData = {
 }
 ```
 
-Use the REAL data from Phase 1. This is the only file you code.
+Use REAL data from Phase 1.
 
 ---
 
-## Phase 3 — Copy pre-built UI + Auto-launch
-
-Run these bash commands in order:
+## Phase 3 — Launch UI (one Bash command — no npm in target repo)
 
 ```bash
-# Step 1: Copy the pre-built UI to the reports directory
-mkdir -p reports/artifacts/I1/ui/src
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/package.json reports/artifacts/I1/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/vite.config.js reports/artifacts/I1/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/index.html reports/artifacts/I1/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/main.jsx reports/artifacts/I1/ui/src/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/App.jsx reports/artifacts/I1/ui/src/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/App.css reports/artifacts/I1/ui/src/
-# data.js was already written in Phase 2
-
-# Step 2: Install dependencies
-cd reports/artifacts/I1/ui && npm install
-
-# Step 3: Start Vite dev server (auto-opens browser via vite.config.js open:true)
-npm run dev &
+polyglot-eval serve-ui --task I1 --data reports/artifacts/I1/data.json
 ```
 
-Then print:
+This copies data.js into the central polyglot-eval UI and starts Vite. Print the URL:
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  🖥️  ER Diagram UI is now running!                      │
-│                                                         │
 │  ➡️  http://localhost:5173                               │
-│                                                         │
-│  Tabs: Diagram | Entities | Relationships               │
-│  To stop: kill the Vite process                         │
 └─────────────────────────────────────────────────────────┘
 ```
+
+If `polyglot-eval` is not on PATH, use:
+```bash
+python -m polyglot_eval.ui_launcher --task I1 --data reports/artifacts/I1/data.js
+```
+(from the polyglot-eval install with venv activated)
 
 ---
 
 ## Phase 4 — Report
 
-Write `reports/I1_er_diagram.md` with:
-- **entities**, **primary_keys**, **relationships**, **er_diagram**, **sources**
-- **ui_instructions**: "UI is already running at http://localhost:5173"
+Write `reports/I1_er_diagram.md` with entities, PKs, relationships, er_diagram, sources, and
+**ui_instructions**: URL only — no UI files in the target repo.
 
 ## Rules
-1. You write ONLY `data.js`. All other UI files are pre-built. Do NOT recreate them.
-2. Be fast. Scan only model/schema files. Skip everything else.
-3. Cite source files for every entity and relationship.
-4. Phase 3 is mandatory — the UI must auto-launch.
+1. **One file only** in target repo: `reports/artifacts/I1/data.json`
+2. **Never** scaffold `reports/artifacts/I1/ui/`
+3. Cite source files for every entity and relationship
+4. Phase 3 is mandatory — user must get the localhost URL

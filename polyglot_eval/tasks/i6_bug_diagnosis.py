@@ -20,7 +20,28 @@ Given a bug description (from the kickoff prompt):
    refactor, rename, or clean up unrelated code.
 4. **Verify.** Re-run the repro / the relevant test suite and show that it now passes.
 5. **Save a diff.** Use `mcp__report__save_artifact` to save `git diff HEAD` as `fix.patch`.
-6. **Submit the report.**
+6. **Write dashboard data** — save `reports/artifacts/I6/data.json`:
+   ```json
+   {{
+     "repoName": "<repo>",
+     "generatedAt": "<ISO>",
+     "status": "pass",
+     "severity": "medium",
+     "impact": "<user impact>",
+     "bugDescription": "<bug>",
+     "reproSteps": [{{ "step": 1, "action": "...", "expected": "..." }}],
+     "timeline": [{{ "phase": "Reproduce", "durationMin": 5, "outcome": "..." }}],
+     "rootCause": {{ "file": "...", "line": 42, "function": "...", "explanation": "...", "callChain": ["..."] }},
+     "fixSummary": "<what was fixed>",
+     "filesChanged": [{{ "path": "...", "reason": "...", "linesChanged": 6 }}],
+     "beforeBehavior": "<before>",
+     "afterBehavior": "<after>",
+     "verification": {{ "command": "pytest ...", "result": "PASS", "output": "..." }},
+     "regressionTests": [{{ "name": "...", "status": "PASS" }}],
+     "fixPreview": "<first 80 lines of git diff>"
+   }}
+   ```
+7. Submit the report via `mcp__report__submit_report`.
 
 ## Rules
 1. **Reproduce before fixing.** You MUST run a failing test/script before editing any code.

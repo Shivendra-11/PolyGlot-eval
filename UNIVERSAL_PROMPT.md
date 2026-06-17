@@ -42,6 +42,8 @@ Start by printing this menu:
 ║                                                              ║
 ║  I6  Bug Diagnosis & Fix            (writes repo, gated)     ║
 ║      Reproduce → root cause → minimal fix → verify           ║
+║  ──────────────────────────────────────────────────────────  ║
+║  ALL  Run I1→I6 sequentially + dashboard at localhost:5175  ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
 
@@ -50,7 +52,7 @@ Start by printing this menu:
 Ask the following questions (you may ask them all at once):
 
 1. **Which subagent(s) would you like to run?**
-   Enter one or more IDs separated by commas (e.g. `I1`, `I1,I2`, `I3`).
+   Enter one or more IDs (e.g. `I1`, `I1,I2`) or `ALL` for the full pipeline + dashboard.
 
 2. **Task-specific inputs** (only ask for the selected tasks):
    - **I2**: Is there a specific endpoint, function, or event you want traced?
@@ -71,68 +73,36 @@ For each selected task, follow the corresponding instructions below **exactly**.
 Run tasks in ID order (I1 before I2, etc.).
 Read-only tasks (I1, I2) may conceptually run in parallel; write tasks (I3, I6) are sequential.
 
+### after all tasks — generate dashboard data + launch
+
+```bash
+source "$POLYGLOT_EVAL_INSTALL/.venv/bin/activate"
+polyglot-eval generate-data --repo "<TARGET_REPO>" --serve
+```
+
+This writes `reports/artifacts/I{1..6}/data.json` and opens:
+- **Dashboard:** http://localhost:5175 (all agents)
+- **I1:** http://localhost:5173 · **I2:** http://localhost:5174
+
 ---
 
 ### I1 — ER Diagram + React Viewer UI
 
 **Tools:** Read, Grep, Glob, Write, Bash.
 
-> ⚠️ **CRITICAL: DO NOT write or generate App.jsx, App.css, main.jsx, index.html, package.json, or vite.config.js.**
-> Those files are PRE-BUILT. You write ONLY `data.js`. Then COPY the pre-built UI and launch.
+> ⚠️ **CRITICAL: DO NOT write or generate App.jsx, App.css, main.jsx, index.html, package.json, vite.config.js, or anything under `reports/artifacts/I1/ui/`.**
+> The React UI is pre-built in the polyglot-eval install. You write ONLY `reports/artifacts/I1/data.json`, then run `serve-ui`.
 
 **Instructions:**
-1. **SPEED RULE:** Do NOT read tests, configs, docs, node_modules, or unrelated files. Skip deep analysis. Go straight to copying files and launching. The user expects the localhost URL to be generated and launched instantly (under 30 seconds).
-2. Glob for schema/model files: `**/models.py`, `**/models/**/*.py`, `**/*.schema.ts`,
-   `**/schema.prisma`, `**/*.entity.ts`, `**/entities/**/*.java`, `**/*.sql`, `**/migrations/**`.
-3. Grep for: `@Entity`, `@Table`, `class.*Model`, `Base =`, `db.Model`, `schema(`,
-   `createTable`, `models.define`.
-4. Read ONLY the matched files. Extract every entity/table, its columns, PKs, and FK relationships.
-5. Label inferred FK relationships (naming-convention-based) as "inferred".
-6. Build a Mermaid `erDiagram`. Validate it mentally.
-7. Write **exactly one file**: `reports/artifacts/I1/ui/src/data.js` containing the extracted data:
-   ```js
-   export const erData = {
-     repoName: "<actual repo name>",
-     generatedAt: "<ISO timestamp>",
-     mermaidDiagram: `erDiagram\n    <real mermaid content>`,
-     entities: [
-       {
-         name: "EntityName",
-         sourceFile: "path/to/file.py",
-         sourceLine: 12,
-         columns: [
-           { name: "id", type: "int", isPK: true, isFK: false, references: null },
-           { name: "user_id", type: "int", isPK: false, isFK: true, references: "User.id" }
-         ]
-       }
-     ],
-     relationships: [
-       { from: "A", to: "B", type: "explicit|inferred", label: "belongs to",
-          sourceFile: "path/to/file.py", sourceLine: 20 }
-     ]
-   }
-   ```
-7. Copy the pre-built UI files from `C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/` using the Bash tool:
+1. Glob for schema/model files (read-only, be fast).
+2. Extract entities, columns, PKs, FK relationships. Build Mermaid `erDiagram`.
+3. Write **exactly one file**: `reports/artifacts/I1/data.json` (valid JSON, NOT under `ui/`).
+4. Launch the central UI:
    ```bash
-   mkdir -p reports/artifacts/I1/ui/src
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/package.json reports/artifacts/I1/ui/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/vite.config.js reports/artifacts/I1/ui/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/index.html reports/artifacts/I1/ui/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/main.jsx reports/artifacts/I1/ui/src/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/App.jsx reports/artifacts/I1/ui/src/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/App.css reports/artifacts/I1/ui/src/
-   cd reports/artifacts/I1/ui && npm install
-   npm run dev &
-   sleep 4
-   start http://localhost:5173 2>/dev/null || open http://localhost:5173 2>/dev/null || xdg-open http://localhost:5173 2>/dev/null
+   polyglot-eval serve-ui --task I1 --data reports/artifacts/I1/data.json
    ```
-8. Write report to `reports/I1_er_diagram.md` with sections:
-   - **entities**: All tables found, with source file + line
-   - **primary_keys**: PKs per entity, with citation
-   - **relationships**: All FK/inferred rels, labelled, with citation
-   - **er_diagram**: The full Mermaid erDiagram block
-   - **sources**: Every file that contributed
-   - **ui_instructions**: "UI is already running at http://localhost:5173"
+5. Print the URL: **http://localhost:5173**
+6. Write report to `reports/I1_er_diagram.md` with entities, primary_keys, relationships, er_diagram, sources, and **ui_instructions** (URL only).
 
 ---
 
@@ -140,70 +110,19 @@ Read-only tasks (I1, I2) may conceptually run in parallel; write tasks (I3, I6) 
 
 **Tools:** Read, Grep, Glob, Write, Bash.
 
-> ⚠️ **CRITICAL: DO NOT write or generate App.jsx, App.css, main.jsx, index.html, package.json, or vite.config.js.**
-> Those files are PRE-BUILT. You write ONLY `data.js`. Then COPY the pre-built UI and launch.
+> ⚠️ **CRITICAL: DO NOT write or generate App.jsx, App.css, main.jsx, index.html, package.json, vite.config.js, or anything under `reports/artifacts/I2/ui/`.**
+> The React UI is pre-built in the polyglot-eval install. You write ONLY `reports/artifacts/I2/data.json`, then run `serve-ui`.
 
 **Instructions:**
-1. **SPEED RULE:** Do NOT read utility files, tests, configs, node_modules, or unrelated files. Skip deep analysis. Go straight to copying files and launching. The user expects the localhost URL to be generated and launched instantly (under 30 seconds).
-2. Find the entry point: look for router registrations, `@app.get/post`, `addEventListener`,
-   `@MessageMapping`, `consumer.subscribe`, `main()`.
-3. If the user specified an endpoint/function, start there. Otherwise auto-detect.
-4. Follow the call chain file by file. Grep for function definitions. Read each file.
-5. At every step, note: file path, function/method name, what it does.
-6. Identify all external I/O: DB queries, HTTP calls, queue messages, file writes, cache ops.
-7. Note any dynamic dispatch or uncertainty explicitly.
-8. Build a Mermaid `sequenceDiagram`. Validate it.
-9. Write **exactly one file**: `reports/artifacts/I2/ui/src/data.js` containing the trace data:
-   ```js
-   export const traceData = {
-     repoName: "<actual repo name>",
-     tracedFlow: "<name of traced endpoint/event>",
-     generatedAt: "<ISO timestamp>",
-     mermaidDiagram: `sequenceDiagram\n    <actual mermaid content>`,
-     entryPoint: {
-       file: "app/routes/orders.py", function: "create_order", line: 42,
-       description: "...", registeredAs: "@router.post('/orders')"
-     },
-     steps: [
-       { index: 1, file: "...", function: "...", line: 42,
-          description: "...", ioType: null },
-       { index: 2, file: "...", function: "...", line: 18,
-          description: "...", ioType: "db_write" }
-     ],
-     externalDeps: [
-       { name: "Stripe API", file: "...", line: 33, description: "..." }
-     ],
-     sideEffects: [
-       { type: "db_write", file: "...", line: 55, description: "INSERT into orders" },
-       { type: "queue_publish", file: "...", line: 80, description: "Kafka order.created" }
-     ],
-     uncertainty: [
-       { description: "Plugin hook — runtime dispatch, target unknown", file: "...", line: 92 }
-     ]
-   }
-   ```
-9. Copy the pre-built UI files from `C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/` using the Bash tool:
+1. Trace the primary request flow (read-only, be fast).
+2. Build Mermaid `sequenceDiagram` with real steps and I/O.
+3. Write **exactly one file**: `reports/artifacts/I2/data.json`.
+4. Launch:
    ```bash
-   mkdir -p reports/artifacts/I2/ui/src
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/package.json reports/artifacts/I2/ui/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/vite.config.js reports/artifacts/I2/ui/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/index.html reports/artifacts/I2/ui/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/src/main.jsx reports/artifacts/I2/ui/src/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/src/App.jsx reports/artifacts/I2/ui/src/
-   cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/src/App.css reports/artifacts/I2/ui/src/
-   cd reports/artifacts/I2/ui && npm install
-   npm run dev &
-   sleep 4
-   start http://localhost:5174 2>/dev/null || open http://localhost:5174 2>/dev/null || xdg-open http://localhost:5174 2>/dev/null
+   polyglot-eval serve-ui --task I2 --data reports/artifacts/I2/data.json
    ```
-10. Write report to `reports/I2_flow_trace.md` with sections:
-   - **entry_point**: File, function, and how it is registered
-   - **steps**: Ordered trace steps with file + function citations
-   - **external_deps**: External HTTP/SDK/queue calls with file/line
-   - **side_effects**: DB writes, queue publishes, file writes, cache sets
-   - **sequence_diagram**: Full Mermaid sequenceDiagram block
-   - **uncertainty**: Dynamic or unresolvable parts of the trace
-   - **ui_instructions**: "UI is already running at http://localhost:5174"
+5. Print the URL: **http://localhost:5174**
+6. Write report to `reports/I2_flow_trace.md` with entry_point, steps, external_deps, side_effects, sequence_diagram, uncertainty, and **ui_instructions** (URL only).
 
 ---
 

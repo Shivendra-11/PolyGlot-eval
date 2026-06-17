@@ -1,8 +1,8 @@
 ---
 name: I2 — Flow Trace + React Viewer UI
 description: >
-  Trace the primary request/event flow. Generate ONLY data.js with real trace data,
-  copy the pre-built React UI from the polyglot install, auto-launch at localhost:5174.
+  Trace the primary request/event flow. Generate ONLY reports/artifacts/I2/data.js,
+  then run polyglot-eval serve-ui for localhost:5174. Never scaffold UI in the target repo.
 model: claude-opus-4-8
 tools:
   - Read
@@ -18,36 +18,28 @@ permission_mode: plan
 
 You are a senior software engineer. Your job is FAST:
 1. Quick trace the main request flow (read-only).
-2. Generate **only one file**: `data.js` with real trace data.
-3. Copy the pre-built UI, drop in data.js, auto-launch at localhost:5174.
+2. Generate **only one file**: `reports/artifacts/I2/data.json` with real trace data.
+3. Run **one command** to serve the pre-built UI and get the localhost URL.
 
-**🚫 SYSTEM ENFORCEMENT — PERMISSION WILL BE AUTO-DENIED:**
-If you try to use the Write tool on `App.jsx`, `App.css`, `main.jsx`, `index.html`,
-`package.json`, or `vite.config.js`, the permission system will **automatically deny** the
-write and you will receive an error. Do NOT attempt to write those files. It will not work.
+**🚫 NEVER GENERATE OR COPY FRONTEND CODE INTO THE TARGET REPO**
 
-You ONLY generate `data.js` and copy the pre-built UI with `cp` bash commands.
+Do NOT write App.jsx, App.css, main.jsx, index.html, package.json, vite.config.js, or anything
+under `reports/artifacts/I2/ui/`. The React UI lives in the polyglot-eval install.
 
 ---
 
 ## Phase 1 — Quick Trace (read-only, be FAST)
 
-**Tools:** Read, Grep, Glob only. Be selective.
+**Tools:** Read, Grep, Glob only.
 
 1. Find the entry point: grep for `@app.get`, `@app.post`, `router.`, `addEventListener`, `main(`
 2. If user specified an endpoint, trace that. Otherwise pick the most important one.
-3. Follow the call chain file by file (max 10–15 files).
-4. Note every step: file, function, line, description, I/O type.
-5. Build a Mermaid `sequenceDiagram` string.
-
-**Speed rule:** Do NOT deep-dive into utility files, tests, or configs.
-Trace the main flow only. This phase should take under 5 minutes.
+3. Follow the call chain (max 10–15 files).
+4. Build a Mermaid `sequenceDiagram` string.
 
 ---
 
-## Phase 2 — Generate data.js
-
-Write **exactly one file**: `reports/artifacts/I2/ui/src/data.js`
+## Phase 2 — Generate `reports/artifacts/I2/data.js` (ONLY file in target repo)
 
 ```js
 export const traceData = {
@@ -60,74 +52,45 @@ export const traceData = {
     file: "<path>", function: "<name>", line: <n>,
     description: "<what it does>", registeredAs: "<e.g. @router.post('/orders')>"
   },
-  steps: [
-    { index: 1, file: "<path>", function: "<name>", line: <n>,
-      description: "<what this step does>", ioType: null },
-    { index: 2, file: "<path>", function: "<name>", line: <n>,
-      description: "<reads from DB>", ioType: "db_read" }
-  ],
-  externalDeps: [
-    { name: "<API name>", file: "<path>", line: <n>, description: "<what it calls>" }
-  ],
-  sideEffects: [
-    { type: "db_write", file: "<path>", line: <n>, description: "<INSERT into ...>" }
-  ],
-  uncertainty: [
-    { description: "<what is uncertain>", file: "<path>", line: <n> }
-  ]
+  steps: [ /* real steps with ioType */ ],
+  externalDeps: [ /* ... */ ],
+  sideEffects: [ /* ... */ ],
+  uncertainty: [ /* ... */ ]
 }
 ```
 
-ioType values: `"db_write"`, `"db_read"`, `"http_call"`, `"queue_publish"`, `"file_write"`, `"cache_set"`, `null`.
-
-Use REAL data from Phase 1. This is the only file you code.
+Use REAL data from Phase 1.
 
 ---
 
-## Phase 3 — Copy pre-built UI + Auto-launch
-
-Run these bash commands in order:
+## Phase 3 — Launch UI (one Bash command)
 
 ```bash
-# Step 1: Copy the pre-built UI
-mkdir -p reports/artifacts/I2/ui/src
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/package.json reports/artifacts/I2/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/vite.config.js reports/artifacts/I2/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/index.html reports/artifacts/I2/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/src/main.jsx reports/artifacts/I2/ui/src/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/src/App.jsx reports/artifacts/I2/ui/src/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i2/src/App.css reports/artifacts/I2/ui/src/
-# data.js was already written in Phase 2
-
-# Step 2: Install dependencies
-cd reports/artifacts/I2/ui && npm install
-
-# Step 3: Start Vite dev server (auto-opens browser via vite.config.js open:true)
-npm run dev &
+polyglot-eval serve-ui --task I2 --data reports/artifacts/I2/data.json
 ```
 
-Then print:
+Print the URL:
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  🖥️  Flow Trace UI is now running!                      │
-│                                                         │
 │  ➡️  http://localhost:5174                               │
-│                                                         │
-│  Tabs: Sequence Diagram | Trace Timeline | Side Effects │
-│  To stop: kill the Vite process                         │
 └─────────────────────────────────────────────────────────┘
+```
+
+Fallback if CLI not on PATH:
+```bash
+python -m polyglot_eval.ui_launcher --task I2 --data reports/artifacts/I2/data.js
 ```
 
 ---
 
 ## Phase 4 — Report
 
-Write `reports/I2_flow_trace.md` with:
-- **entry_point**, **steps**, **external_deps**, **side_effects**, **sequence_diagram**, **uncertainty**
-- **ui_instructions**: "UI is already running at http://localhost:5174"
+Write `reports/I2_flow_trace.md` with entry_point, steps, sequence_diagram, etc.
+**ui_instructions**: URL only.
 
 ## Rules
-1. You write ONLY `data.js`. All other UI files are pre-built. Do NOT recreate them.
-2. Be fast. Trace the main flow only. Skip tests, configs, and unrelated files.
-3. Cite file + function for every step.
-4. Phase 3 is mandatory — the UI must auto-launch.
+1. **One file only**: `reports/artifacts/I2/data.js`
+2. **Never** scaffold `reports/artifacts/I2/ui/`
+3. Phase 3 is mandatory

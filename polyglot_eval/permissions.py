@@ -13,7 +13,7 @@ target directory is a git repo with a clean working tree and creates a task bran
 
 from __future__ import annotations
 
-import re
+import 
 import subprocess
 from pathlib import Path
 from typing import Callable
@@ -46,6 +46,8 @@ _UI_READONLY_FILES = {
 }
 # Task IDs that have pre-built UIs the agent must not recreate.
 _PREBUILT_UI_TASKS = {"I1", "I2"}
+# Target-repo paths where UI scaffolding must never appear (data.js lives one level up).
+_UI_ARTIFACT_SUBDIRS = ("artifacts/i1/ui", "artifacts/i2/ui")
 
 # Bash sub-commands that are safe to allow without gating (read-only git/fs ops)
 _SAFE_BASH_PATTERNS: list[re.Pattern] = [
@@ -73,24 +75,37 @@ def _is_hard_denied(tool_name: str, tool_input: dict) -> bool:
 def _is_prebuilt_ui_write(tool_name: str, tool_input: dict, task_id: str) -> bool:
     """Return True if the agent is trying to write a pre-built UI file it must not touch.
 
-    For I1/I2 tasks the React UI is pre-built at polyglot_eval/ui/i1 and i2/.
-    The agent is only allowed to write data.js; all other UI files are read-only.
+    For I1/I2 the React UI is served from the polyglot-eval install via ``serve-ui``.
+    The agent may only write ``reports/artifacts/I1/data.js`` (or I2) plus the markdown report.
     """
     if task_id not in _PREBUILT_UI_TASKS:
         return False
+
+    path = tool_input.get("file_path", tool_input.get("path", ""))
+    norm = path.replace("\\", "/").lower() if path else ""
+
     if tool_name in _WRITE_TOOLS:
-        # Check by the basename of the file being written
-        path = tool_input.get("file_path", tool_input.get("path", ""))
         basename = Path(path).name if path else ""
         if basename in _UI_READONLY_FILES:
             return True
+        if any(sub in norm for sub in _UI_ARTIFACT_SUBDIRS):
+            return True
+        # Legacy path — data.js must not live under ui/
+        if basename == "data.js" and "/ui/" in norm:
+            return True
+
     if tool_name == _BASH_TOOL:
         cmd = tool_input.get("command", tool_input.get("input", ""))
-        # Block any bash command that writes one of the protected files
-        # (e.g. `echo ... > App.jsx` or `tee App.jsx`)
+        cmd_lower = cmd.lower()
         for fname in _UI_READONLY_FILES:
-            if fname in cmd and (">>" in cmd or ">" in cmd or "tee" in cmd):
+            if fname.lower() in cmd_lower and (">>" in cmd or ">" in cmd or "tee" in cmd):
                 return True
+        if any(sub in cmd_lower for sub in _UI_ARTIFACT_SUBDIRS):
+            return True
+        if "npm install" in cmd_lower and "/ui" in cmd_lower and "artifacts/i" in cmd_lower:
+            return True
+        if "npm run dev" in cmd_lower and "artifacts/i" in cmd_lower:
+            return True
     return False
 
 
@@ -145,10 +160,11 @@ def make_permission_handler(autonomy: Autonomy, repo: Path, task_id: str = "") -
             basename = Path(path).name if path else tool_input.get("command", "")
             return PermissionResultDeny(
                 reason=(
-                    f"Pre-built UI guard: You tried to write '{basename}', but that file "
-                    f"is PRE-BUILT for task {task_id} and must NOT be recreated. "
-                    f"You are only allowed to write 'data.js'. "
-                    f"Copy the pre-built UI with 'cp' commands instead."
+                    f"Pre-built UI guard: You tried to write or scaffold UI files for task {task_id}. "
+                    f"The React UI is served from the polyglot-eval install — do NOT copy or generate "
+                    f"App.jsx, package.json, or anything under reports/artifacts/{task_id}/ui/. "
+                    f"Write ONLY reports/artifacts/{task_id}/data.js, then run: "
+                    f"polyglot-eval serve-ui --task {task_id} --data reports/artifacts/{task_id}/data.js"
                 )
             )
 

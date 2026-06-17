@@ -1,12 +1,12 @@
-# Byte-compiled / optimized / DLL files
+# =============================================================================
+# polyglot-eval — safe to push to GitHub
+# =============================================================================
+
+# ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -25,42 +25,115 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+pip-wheel-metadata/
+share/
 
-# Unit test / coverage reports
+# Test / coverage / type check
 .pytest_cache/
 .coverage
 .coverage.*
 .cache
 htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+coverage.xml
+*.cover
+nosetests.xml
 
-# Environments
-.env
-.venv
-env/
+# Virtual environments
+.venv/
 venv/
+env/
 ENV/
+env.bak/
+venv.bak/
 
-# Node/JavaScript dependencies & builds
+# ── Node / JavaScript (React viewers: dashboard, i1, i2) ─────────────────────
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 .eslintcache
 .parcel-cache
+.vite/
+*.tsbuildinfo
 
-# polyglot-eval reports and run artifacts
+# Vite production builds (not source)
+polyglot_eval/ui/*/dist/
+
+# Generated viewer data (local paths from last eval run — use data.stub.js in repo)
+polyglot_eval/ui/*/src/data.js
+
+# ── Environment & secrets (never commit tokens) ───────────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+# Public Vercel viewer URLs only (no secrets)
+!.env.production
+
+# Credentials & keys
+*.pem
+*.key
+credentials.env
+credentials.json
+.secrets
+.secret
+
+# ── Deploy platforms ──────────────────────────────────────────────────────────
+.vercel/
+.netlify/
+
+# ── polyglot-eval runtime output (when eval runs against this repo) ───────────
 reports/
 
-# IDE files
+# ── IDE & editor ──────────────────────────────────────────────────────────────
 .vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
 .idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
 
-# OS files
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
-.DS_Store
+
+# ── Logs & temp ───────────────────────────────────────────────────────────────
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# ── Docker (local eval / I5 runs) ─────────────────────────────────────────────
+.docker/
+
+# ── Cursor / local agent state (machine-specific) ─────────────────────────────
+.cursor/

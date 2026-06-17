@@ -1,155 +1,282 @@
 # polyglot-eval
 
-A repo-agnostic AI agent that runs six Intermediate engineering eval tasks (I1–I6)
-on any target repository using the **Claude Agent SDK**.
+A **repo-agnostic AI agent** that runs six Intermediate engineering eval tasks (I1–I6) on any target repository using the **Claude Agent SDK**. Results are written as markdown reports and served in interactive React dashboards.
 
-## Quick Start
+---
+
+## Live dashboard & viewers
+
+Open the hosted eval UI in your browser — no local setup required:
+
+| # | Viewer | URL |
+|---|--------|-----|
+| 1 | **Combined dashboard** — all tasks I1–I6, stats, and drill-down panels | **https://polyglot-eval.vercel.app** |
+| 2 | **I1 — ER Diagram** — entity map and Mermaid diagram | **https://polyglot-eval-i1.vercel.app** |
+| 3 | **I2 — Flow Trace** — sequence diagram and step timeline | **https://polyglot-eval-i2.vercel.app** |
+
+> **Quick link:** [polyglot-eval.vercel.app](https://polyglot-eval.vercel.app) — start here for the full overview and task results.
+
+To publish fresh results after running eval on a repo:
 
 ```bash
-# 1. Install
-pip install -e .
-
-# 2. Set API key
-export ANTHROPIC_API_KEY=sk-ant-...
-
-# 3. Run a single task (read-only, safe)
-polyglot-eval --repo /path/to/some-repo --tasks I1
-
-# 4. Run multiple tasks
-polyglot-eval --repo . --tasks I1,I2
-
-# 5. Run all tasks
-polyglot-eval --repo . --tasks all
-
-# 6. List available tasks
-polyglot-eval --list-tasks
+export VERCEL_TOKEN=your_token
+polyglot-eval deploy-ui --repo /path/to/your-repo
 ```
 
-## Available Tasks
+---
 
-| ID | Title | Mode | Description |
-|----|-------|------|-------------|
-| **I1** | ER Diagram | read-only | Scan ORM models → Mermaid `erDiagram` + React UI viewer at localhost:5173 |
-| **I2** | Flow Trace | read-only | Trace primary request path → Mermaid `sequenceDiagram` + React UI viewer at localhost:5174 |
-| **I3** | Safe Change | writes repo (gated) | Minimal change on a branch, tests required, never commits |
-| **I4** | Polyglot Pair | creates artifacts | FastAPI + Node.js currency service + CLI + tests from scratch |
-| **I5** | Dockerize | creates artifacts | Dockerfile, build proof, run proof, health check |
-| **I6** | Bug Diagnosis | writes repo (gated) | Reproduce → root cause → minimal fix → verify |
+## About this repository
 
-## CLI Reference
+| | |
+|---|---|
+| **Purpose** | Evaluate how well an AI agent understands, changes, and ships code in an unfamiliar codebase |
+| **Stack** | Python 3.10+ CLI · Claude Agent SDK · React + Vite viewers |
+| **Target** | Any git repo — Django, React, Node, polyglot monorepos, etc. |
+| **Safety** | Never commits, pushes, or runs destructive shell commands |
+
+### What it does
+
+1. **Scans or modifies** a target repo according to the selected task(s)
+2. **Writes reports** to `<target-repo>/reports/` (markdown + JSON artifacts)
+3. **Serves dashboards** at local ports so you can explore ER diagrams, flow traces, diffs, Docker proofs, and more
+
+### Eval tasks (I1–I6)
+
+| ID | Title | Mode | Local | Live |
+|----|-------|------|-------|------|
+| **I1** | ER Diagram | read-only | localhost:5173 | [polyglot-eval-i1.vercel.app](https://polyglot-eval-i1.vercel.app) |
+| **I2** | Flow Trace | read-only | localhost:5174 | [polyglot-eval-i2.vercel.app](https://polyglot-eval-i2.vercel.app) |
+| **I3** | Safe Change | writes repo (gated) | Dashboard | Dashboard |
+| **I4** | Polyglot Pair | creates artifacts | Dashboard | Dashboard |
+| **I5** | Dockerize | creates artifacts | Dashboard | Dashboard |
+| **I6** | Bug Diagnosis | writes repo (gated) | Dashboard | Dashboard |
+| **ALL** | Combined dashboard | read-only | localhost:5175 | [polyglot-eval.vercel.app](https://polyglot-eval.vercel.app) |
+
+---
+
+## Prerequisites
+
+| Tool | Version | Required for |
+|------|---------|--------------|
+| Python | 3.10+ | CLI and orchestrator |
+| Node.js + npm | 18+ | React dashboards (I1, I2, combined) |
+| `ANTHROPIC_API_KEY` | — | AI task execution |
+| Docker | latest | I5 only |
+| `@mermaid-js/mermaid-cli` | optional | Full Mermaid render validation (I1/I2) |
+
+---
+
+## Local setup
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/YOUR_ORG/polyglot-builder.git
+cd polyglot-builder
+
+# Create a virtual environment (recommended)
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# Install polyglot-eval in editable mode
+pip install -e .
+
+# Optional: Claude Agent SDK for full agent runs
+pip install -e ".[sdk]"
+
+# Optional: dev tools (pytest, httpx)
+pip install -e ".[dev]"
+```
+
+### 2. Authenticate
+
+```bash
+# Option A — environment variable
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Option B — Claude CLI login
+ant auth login
+```
+
+### 3. Install dashboard UI dependencies (first run only)
+
+```bash
+cd polyglot_eval/ui/dashboard && npm install && cd ../../..
+cd polyglot_eval/ui/i1 && npm install && cd ../../..
+cd polyglot_eval/ui/i2 && npm install && cd ../../..
+```
+
+Or let the CLI install them automatically on first `serve-ui`.
+
+### 4. Run against a target repo
+
+```bash
+# Read-only ER diagram
+polyglot-eval --repo /path/to/your-repo --tasks I1
+
+# Multiple tasks
+polyglot-eval --repo . --tasks I1,I2
+
+# All tasks
+polyglot-eval --repo . --tasks all
+
+# Dry-run (no writes)
+polyglot-eval --repo . --tasks I3 --autonomy dryrun
+```
+
+### 5. View results in the browser
+
+```bash
+# Combined dashboard (aggregates I1–I6 from reports/)
+polyglot-eval serve-ui --task dashboard --repo /path/to/your-repo
+
+# Individual viewers
+polyglot-eval serve-ui --task I1 --data /path/to/your-repo/reports/artifacts/I1/data.json
+polyglot-eval serve-ui --task I2 --data /path/to/your-repo/reports/artifacts/I2/data.json
+
+# Generate sample dashboard data + launch (no AI run required)
+polyglot-eval generate-data --repo /path/to/your-repo --serve
+
+# Deploy to Vercel (unique URLs per repo)
+export VERCEL_TOKEN=your_token
+polyglot-eval deploy-ui --repo /path/to/your-repo
+```
+
+Open **http://localhost:5175** for the combined dashboard locally, or use the [live dashboard](https://polyglot-eval.vercel.app).
+
+---
+
+## CLI reference
 
 ```
 polyglot-eval [OPTIONS]
 
 Options:
   --repo PATH         Target repository path (default: current directory)
-  --tasks TASKS       Comma-separated task IDs: I1,I2,I3 or 'all' (default: all)
-  --out PATH          Output directory for reports (default: <repo>/reports/)
+  --tasks TASKS       Comma-separated: I1,I2,I3 or 'all' (default: all)
+  --out PATH          Output directory (default: <repo>/reports/)
   --autonomy MODE     gated | auto | dryrun (default: gated)
   --model MODEL       Model for all tasks (default: claude-opus-4-8)
   --list-tasks        Show all tasks and exit
+
+Subcommands:
+  serve-ui            Launch React viewers (I1, I2, dashboard, all)
+  generate-data       Build dashboard JSON from repo scan (no AI)
+  deploy-ui           Deploy dashboard + I1 + I2 to Vercel (fixed URLs)
 ```
 
-### Autonomy Modes
+### Autonomy modes
 
 | Mode | Behaviour |
 |------|-----------|
-| `gated` | **Default.** Prompts the operator before every file write or shell command. |
+| `gated` | **Default.** Prompts before every file write or shell command. |
 | `auto` | Writes without prompting. Hard-denies `git push`, `git commit`, `rm -rf`, `docker push`. |
-| `dryrun` | No writes to the repo. Agent emits intended changes as diffs in the report. |
+| `dryrun` | No repo writes. Agent emits intended changes as diffs in the report. |
 
-## Examples
+---
 
-```bash
-# Generate ER diagram for a Django project
-polyglot-eval --repo ~/projects/myapp --tasks I1
+## Project structure
 
-# Trace the checkout flow in an e-commerce repo
-polyglot-eval --repo ~/projects/shop --tasks I2
-
-# Make a specific change (gated — will prompt before each write)
-polyglot-eval --repo . --tasks I3
-
-# Build the polyglot pair in the current directory
-polyglot-eval --repo . --tasks I4
-
-# Run I1 + I2 concurrently (read-only tasks run in parallel)
-polyglot-eval --repo . --tasks I1,I2
-
-# Dry-run a bug fix (no repo changes, just the diagnosis report)
-polyglot-eval --repo . --tasks I6 --autonomy dryrun
+```
+polyglot-builder/
+├── polyglot_eval/
+│   ├── cli.py                 # Entry point
+│   ├── orchestrator.py        # Task runner
+│   ├── dashboard_builder.py   # Aggregates I1–I6 into dashboard data
+│   ├── generate_all_data.py   # Offline data generator
+│   ├── vercel_deploy.py       # Vercel deploy (polyglot-eval*.vercel.app)
+│   ├── ui_launcher.py         # Vite dev server launcher
+│   ├── tasks/                 # I1–I6 task definitions
+│   └── ui/
+│       ├── dashboard/         # Combined dashboard (port 5175)
+│       ├── i1/                # ER diagram viewer (port 5173)
+│       └── i2/                # Flow trace viewer (port 5174)
+├── .claude/agents/            # Claude Code subagent definitions
+├── UNIVERSAL_PROMPT.md        # Paste into any repo without installing
+├── pyproject.toml
+└── README.md                  # This file (GitHub only — not shown in the live UI)
 ```
 
-## Using Subagents in Another Repo (No Install Required)
+---
 
-Copy the content of [`UNIVERSAL_PROMPT.md`](./UNIVERSAL_PROMPT.md) and paste it into
-Claude Code (or any Claude interface) while inside the target repository.
+## Output layout
 
-Claude will:
-1. Show the subagent menu
-2. Ask which task(s) you want to run + any task-specific inputs
-3. Run **only** the selected subagent(s)
-4. For I1/I2, automatically copy the prebuilt React UI from the central installation, drop in the analyzed `data.js`, and start the local dev server at localhost:5173/5174.
-5. Write reports to `reports/` in the current directory
-
-## Output
-
-All reports are written to `<repo>/reports/` (or `--out` directory):
+Reports are written to `<target-repo>/reports/`:
 
 ```
 reports/
-  SUMMARY.md                  # Pass/fail table for all tasks run
-  I1_er_diagram.md            # I1 output
-  I2_flow_trace.md            # I2 output
-  I3_safe_change.md           # I3 output
-  I4_polyglot_pair.md         # I4 output
-  I5_dockerize.md             # I5 output
-  I6_bug_diagnosis.md         # I6 output
+  SUMMARY.md
+  polyglot-deploy.json    # Live Vercel URLs (after deploy-ui)
+  I1_er_diagram.md
+  I2_flow_trace.md
+  I3_safe_change.md
+  I4_polyglot_pair.md
+  I5_dockerize.md
+  I6_bug_diagnosis.md
   artifacts/
-    I3/diff.patch             # I3 git diff
-    I4/service/main.py        # I4 FastAPI service
-    I4/service/test_service.py
-    I4/client/index.js        # I4 Node CLI
-    I4/README.md
-    I5/Dockerfile             # I5 Docker artifacts
-    I6/fix.patch              # I6 git diff
+    I1/data.json
+    I2/data.json
+    I3/diff.patch
+    I4/service/ ...
+    I5/Dockerfile
+    I6/fix.patch
 ```
 
-## Interactive Subagents (Claude Code)
+---
 
-The `.claude/agents/` directory contains subagent definitions that Claude Code
-discovers automatically. Open any repo in Claude Code and ask:
+## Using in Cursor / Claude Code
+
+### Slash command
+
+```
+/polyglot-eval
+/polyglot-eval --repo /path/to/repo --tasks I1,I2
+```
+
+### Subagents
+
+Open any repo in Claude Code and use the subagent picker, or:
 
 ```
 /agent I1 — ER Diagram
 ```
 
-or use the subagent picker in the Claude Code UI.
+Agent definitions live in `.claude/agents/`.
 
-## Optional Dependencies
+### Without installing
 
-| Dependency | Purpose | Install |
-|-----------|---------|---------|
-| `@mermaid-js/mermaid-cli` | Full Mermaid render-validation (I1/I2) | `npm i -g @mermaid-js/mermaid-cli` |
-| `docker` | Required for I5 | Platform installer |
-| `node` / `npm` | Required for I4 Node client | https://nodejs.org |
+Copy [`UNIVERSAL_PROMPT.md`](./UNIVERSAL_PROMPT.md) into Claude while inside the target repository.
 
-## Auth
+---
 
-Set `ANTHROPIC_API_KEY` in your environment, or authenticate via:
-
-```bash
-ant auth login
-```
-
-## Safety Guarantees
+## Safety guarantees
 
 polyglot-eval **never**:
+
 - Commits to git
 - Pushes to any remote
 - Runs `rm -rf` or other destructive shell commands
 - Pushes to Docker Hub or any registry
-- Makes external network calls (except to Anthropic's API)
 
-Write tasks always work on a dedicated branch (`polyglot-eval/<task-id>`) and leave the
-main/master branch untouched.
+Write tasks use a dedicated branch (`polyglot-eval/<task-id>`) and leave `main`/`master` untouched.
+
+---
+
+## Development
+
+```bash
+# Run tests
+pytest
+
+# Lint
+ruff check . && ruff format .
+
+# Rebuild dashboard after code changes
+polyglot-eval serve-ui --task dashboard --repo /path/to/repo-with-reports
+```
+
+---
+
+## License
+
+MIT — see repository for details.

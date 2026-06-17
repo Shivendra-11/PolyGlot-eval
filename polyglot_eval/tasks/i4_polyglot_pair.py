@@ -18,12 +18,12 @@ Build the following from scratch, writing all files to `reports/artifacts/I4/` v
 
 ### Service (Python / FastAPI)
 - `service/main.py` — FastAPI app with a `POST /convert` endpoint.
-  - Request body: `{ "amount": float, "from": str, "to": str }`
-  - Response: `{ "amount": float, "from": str, "to": str, "converted": float, "rate": float }`
+  - Request body: `{{ "amount": float, "from": str, "to": str }}`
+  - Response: `{{ "amount": float, "from": str, "to": str, "converted": float, "rate": float }}`
   - Hardcoded exchange rates table for at least: USD, EUR, GBP, JPY, INR, AUD, CAD.
   - Input validation via Pydantic: amount > 0, currency codes must be in the rates table.
   - Returns HTTP 422 for invalid input.
-  - `GET /health` returns `{ "status": "ok" }`.
+  - `GET /health` returns `{{ "status": "ok" }}`.
 - `service/requirements.txt` — `fastapi`, `uvicorn[standard]`, `pydantic`.
 - `service/test_service.py` — pytest tests covering: valid conversion, unknown currency 422,
   negative amount 422, /health endpoint.
@@ -67,6 +67,26 @@ Build the following from scratch, writing all files to `reports/artifacts/I4/` v
 5. The React UI must be visually premium — dark gradient background, glassmorphism card,
    purple accent, smooth animations. Plain/minimal styling is NOT acceptable.
 6. Finish by calling `mcp__report__submit_report` with all required sections.
+7. **Write dashboard data** — save `reports/artifacts/I4/data.json`:
+   ```json
+   {{
+     "repoName": "<repo>",
+     "generatedAt": "<ISO>",
+     "status": "pass",
+     "serviceSummary": "<FastAPI summary>",
+     "clientSummary": "<Node CLI summary>",
+     "uiSummary": "<React UI summary>",
+     "stack": {{ "backend": "...", "client": "...", "ui": "..." }},
+     "endpoints": [{{ "method": "POST", "path": "/convert", "request": {{}}, "response": {{}}, "errors": [] }}],
+     "currencies": ["USD", "EUR"],
+     "artifacts": ["service/main.py", "client/index.js", "ui/package.json"],
+     "tests": {{ "service": {{ "command": "pytest", "passed": 4, "failed": 0 }}, "client": {{}}, "ui": {{}} }},
+     "testOutput": "<pytest output excerpt>",
+     "runInstructions": ["Terminal 1: uvicorn ...", "Terminal 2: npm run dev"],
+     "architectureDiagram": "flowchart LR ...",
+     "ports": {{ "api": 8000, "ui": 5173 }}
+   }}
+   ```
 
 ## Deliverable contract
 {contract}

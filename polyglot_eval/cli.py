@@ -75,6 +75,24 @@ Examples:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Subcommand: polyglot-eval generate-data --repo PATH [--serve]
+    if argv and argv[0] == "generate-data":
+        from .generate_all_data import main as generate_main
+        return generate_main(argv[1:])
+
+    # Subcommand: polyglot-eval deploy-ui --repo PATH [--token TOKEN]
+    if argv and argv[0] == "deploy-ui":
+        from .vercel_deploy import main as deploy_ui_main
+        return deploy_ui_main(argv[1:])
+
+    # Subcommand: polyglot-eval serve-ui --task I1 --data path/to/data.js
+    if argv and argv[0] == "serve-ui":
+        from .ui_launcher import main as serve_ui_main
+        return serve_ui_main(argv[1:])
+
     parser = _build_parser()
     args = parser.parse_args(argv)
 

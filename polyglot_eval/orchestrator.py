@@ -238,6 +238,20 @@ async def run_async(
         print(f"  {icon} {tr.task_id}: {tr.title} ({tr.duration_seconds:.1f}s)")
     print()
 
+    # Combined dashboard when multiple tasks ran (or full pipeline)
+    if len(ordered_ids) >= 2:
+        try:
+            from .ui_launcher import serve_all_viewers
+
+            print("Launching combined dashboard …")
+            urls = serve_all_viewers(repo)
+            print("\n🖥️  Viewers")
+            for name, url in urls.items():
+                print(f"  {name}: {url}")
+            print()
+        except Exception as exc:
+            print(f"⚠️  Dashboard launch skipped: {exc}", file=sys.stderr)
+
     return result
 
 

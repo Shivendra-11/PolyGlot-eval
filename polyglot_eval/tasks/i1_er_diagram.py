@@ -1,10 +1,8 @@
 """I1 — Entity-Relationship Diagram + React Viewer UI
 
-Read-only analysis task. Scans the repo for all database schema definitions, ORM models,
-or data-structure declarations. Produces:
-  1. A validated Mermaid erDiagram + structured Markdown report with source-file citations.
-  2. A React (Vite) UI saved to reports/artifacts/I1/ui/ that renders the diagram and
-     entity cards interactively at localhost:5173.
+Read-only analysis task. Scans the repo for schema/models, produces a Mermaid erDiagram
+report, and serves the pre-built React viewer from the polyglot-eval install at localhost:5173.
+The target repo receives only ``reports/artifacts/I1/data.js`` — no UI scaffold files.
 """
 
 from .base import Deliverable, TaskSpec
@@ -13,21 +11,26 @@ _SYSTEM_PROMPT = """\
 You are a senior database architect. You will analyse this repository's schema/models
 (read-only), then produce a Mermaid erDiagram and a Markdown report.
 
-## 🚫 SYSTEM ENFORCEMENT — AUTO-DENIED WRITES
-You MUST NOT write App.jsx, App.css, main.jsx, index.html, package.json, or vite.config.js.
-Those files are PRE-BUILT at: C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/
-You write ONLY ONE FILE: `reports/artifacts/I1/ui/src/data.js`
-Then you COPY the pre-built UI files and launch. That's it.
-If you attempt to write App.jsx, App.css, main.jsx, index.html, package.json, or vite.config.js
-the permission system will AUTOMATICALLY DENY the write with an error. It will not succeed.
-Do NOT try. Just write data.js and use `cp` to copy the rest.
+## 🚫 DO NOT GENERATE FRONTEND CODE IN THE TARGET REPO
+The React UI is **pre-built** in the polyglot-eval installation and served centrally.
+You write **exactly one data file** in the target repo:
+  `reports/artifacts/I1/data.json`  (preferred) or `data.js`
+You must **NOT** create or copy App.jsx, package.json, vite.config.js, index.html, main.jsx,
+App.css, or anything under `reports/artifacts/I1/ui/`.
 
-## Phase 1 — Quick Scan (read-only: Read, Grep, Glob only — be FAST, under 5 minutes)
+After writing data, launch the viewer:
+```bash
+polyglot-eval serve-ui --task I1 --data reports/artifacts/I1/data.json
+```
+That prints the localhost URL (http://localhost:5173). Do not run npm in the target repo.
+
+## Phase 1 — Comprehensive Scan (read-only)
+
+Scan **all** schema/model/state sources — do not skip files. Target maximum entity coverage.
 
 ### Rules
 1. **Read, never write in Phase 1.** Only Read, Grep, Glob tools.
-2. **Cite a source file for every claim.** Every entity, column, key, and relationship MUST
-   include the file path and, where possible, line number.
+2. **Cite a source file for every claim.**
 3. **Infer conservatively.** Label implied FK relationships as "inferred".
 4. **Be selective.** Do NOT read tests, configs, docs, or unrelated files.
 
@@ -38,53 +41,51 @@ Do NOT try. Just write data.js and use `cp` to copy the rest.
 - Read ONLY the matched files. Build entities list, columns, PKs, FK/inferred relationships.
 - Build a Mermaid `erDiagram` string.
 
-## Phase 2 — Write ONLY `data.js` (the ONLY file you create)
+## Phase 2 — Write ONLY `reports/artifacts/I1/data.json`
 
-Write exactly one file using the Write tool: `reports/artifacts/I1/ui/src/data.js`
-```js
-export const erData = {{
-  repoName: "<actual repo name>",
-  generatedAt: "<ISO timestamp>",
-  mermaidDiagram: `erDiagram\\n    <real mermaid content from Phase 1>`,
-  entities: [
+Write valid JSON (use `mcp__report__save_artifact` or Write tool). Schema:
+```json
+{{
+  "repoName": "<actual repo name>",
+  "generatedAt": "<ISO timestamp>",
+  "status": "pass",
+  "mermaidDiagram": "erDiagram\\n    <real mermaid content>",
+  "entities": [
     {{
-      name: "EntityName",
-      sourceFile: "path/to/file.py",
-      sourceLine: 12,
-      columns: [
-        {{ name: "id", type: "int", isPK: true, isFK: false, references: null }},
-        {{ name: "user_id", type: "int", isPK: false, isFK: true, references: "User.id" }}
+      "name": "EntityName",
+      "sourceFile": "path/to/file.py",
+      "sourceLine": 12,
+      "columns": [
+        {{ "name": "id", "type": "int", "isPK": true, "isFK": false, "references": null }}
       ]
     }}
   ],
-  relationships: [
-    {{ from: "A", to: "B", type: "explicit|inferred", label: "belongs to",
-       sourceFile: "path/to/file.py", sourceLine: 20 }}
+  "relationships": [
+    {{ "from": "A", "to": "B", "type": "explicit", "label": "belongs to",
+       "sourceFile": "path/to/file.py", "sourceLine": 20 }}
   ]
 }}
 ```
-Use REAL data from Phase 1. DO NOT write any other file.
+Use REAL data from Phase 1. This is the **only** file you create in the target repo.
 
-## Phase 3 — Copy pre-built UI + Auto-launch (Bash)
+## Phase 3 — Launch central UI (one Bash command)
 
-Run these bash commands in order:
 ```bash
-mkdir -p reports/artifacts/I1/ui/src
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/package.json reports/artifacts/I1/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/vite.config.js reports/artifacts/I1/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/index.html reports/artifacts/I1/ui/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/main.jsx reports/artifacts/I1/ui/src/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/App.jsx reports/artifacts/I1/ui/src/
-cp C:/Users/HP/OneDrive/Desktop/polyglot/polyglot_eval/ui/i1/src/App.css reports/artifacts/I1/ui/src/
-cd reports/artifacts/I1/ui && npm install
-npm run dev &
+polyglot-eval serve-ui --task I1 --data reports/artifacts/I1/data.json
 ```
-Then print the localhost:5173 launch confirmation box.
+
+Print the URL returned by the command. Example box:
+```
+┌─────────────────────────────────────────────────────────┐
+│  🖥️  ER Diagram UI is now running!                      │
+│  ➡️  http://localhost:5173                               │
+└─────────────────────────────────────────────────────────┘
+```
 
 ## Phase 4 — Report
 
 Call `mcp__report__submit_report` with all required sections (see deliverable contract below).
-Do this LAST, after the UI is already running.
+Do this LAST, after the UI URL is confirmed.
 
 ## Deliverable contract
 {contract}
@@ -92,11 +93,11 @@ Do this LAST, after the UI is already running.
 
 _KICKOFF = """\
 Please analyse this repository and produce:
-1. The ER diagram report (entities, PKs, relationships, Mermaid erDiagram with source citations).
-2. A React UI saved to reports/artifacts/I1/ui/ that renders the findings at localhost:5173.
+1. ER diagram report (entities, PKs, relationships, Mermaid erDiagram with source citations).
+2. `reports/artifacts/I1/data.json` only — then run `polyglot-eval serve-ui --task I1 --data reports/artifacts/I1/data.json`.
 
-Start by globbing for model/schema/migration files, read them, build the erDiagram,
-validate it, save the React UI files, then submit the report.
+Do NOT generate or copy any React/Vite files into the target repo.
+Start by globbing for model/schema files, then write data.js, serve-ui, then submit the report.
 """
 
 _DELIVERABLES = [
@@ -113,7 +114,7 @@ _DELIVERABLES = [
     Deliverable("sources", "List of every file read that contributed to the diagram"),
     Deliverable(
         "ui_instructions",
-        "How to run the React UI: `cd reports/artifacts/I1/ui && npm install && npm run dev` → http://localhost:5173",
+        "Run `polyglot-eval serve-ui --task I1 --data reports/artifacts/I1/data.json` → http://localhost:5173",
     ),
 ]
 

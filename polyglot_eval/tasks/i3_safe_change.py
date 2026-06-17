@@ -29,7 +29,32 @@ Implement the change described in the kickoff message as safely and minimally as
 5. **Cite every changed file.** For each file you modify or create, explain why it had to change.
 6. **Save a diff artifact.** Use `mcp__report__save_artifact` to save the output of `git diff HEAD`
    as `diff.patch`.
-7. **Finish by calling** `mcp__report__submit_report` with all required sections.
+7. **Write dashboard data.** Save `reports/artifacts/I3/data.json` via `mcp__report__save_artifact`:
+   ```json
+   {{
+     "repoName": "<repo>",
+     "generatedAt": "<ISO>",
+     "status": "pass",
+     "branch": "polyglot-eval/I3",
+     "changeTitle": "<short title>",
+     "changeDescription": "<what changed>",
+     "changeMotivation": "<why>",
+     "changePlan": [{{ "step": 1, "action": "..." }}],
+     "filesChanged": [{{ "path": "...", "reason": "...", "linesChanged": 4, "changeType": "modify", "snippet": "..." }}],
+     "diffSummary": "<human summary>",
+     "diffStats": {{ "filesTouched": 2, "linesAdded": 10, "linesRemoved": 0 }},
+     "diffPreview": "<first 80 lines of git diff>",
+     "tests": [{{ "name": "...", "status": "PASS", "durationMs": 42 }}],
+     "testCommand": "pytest ...",
+     "testOutput": "<full output>",
+     "testResult": "PASS|FAIL",
+     "lintResult": "PASS|FAIL",
+     "riskAssessment": "<risks>",
+     "rollbackSteps": ["git checkout -- path"],
+     "relatedFiles": ["..."]
+   }}
+   ```
+8. **Finish by calling** `mcp__report__submit_report` with all required sections.
 
 ## Change strategy
 - Read the kickoff for the description of the desired change.

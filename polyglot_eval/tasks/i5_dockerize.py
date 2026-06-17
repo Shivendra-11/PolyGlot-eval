@@ -78,7 +78,27 @@ If docker is unavailable: document this, show all files with expected output.
 ## Rules
 1. Never `docker push`. Never push to any registry.
 2. All files written via save_artifact under `reports/artifacts/I5/`.
-3. Finish by calling `mcp__report__submit_report` with all required sections.
+3. **Write dashboard data** — save `reports/artifacts/I5/data.json`:
+   ```json
+   {{
+     "repoName": "<repo>",
+     "generatedAt": "<ISO>",
+     "status": "pass",
+     "strategy": "<docker approach>",
+     "dockerFiles": [{{ "path": "Dockerfile", "role": "...", "baseImage": "node:18-alpine" }}],
+     "compose": {{ "services": [{{ "name": "app", "ports": ["8080:8080"] }}] }},
+     "healthChecks": [{{ "name": "API", "url": "http://localhost:8080/health", "status": "ok", "latencyMs": 12 }}],
+     "healthCheck": {{ "url": "http://localhost:8080/health", "status": "ok", "response": "..." }},
+     "ports": {{ "frontend": 8080 }},
+     "buildSteps": ["docker build -t app:local ."],
+     "buildOutput": "<docker build excerpt>",
+     "runOutput": "<docker run excerpt>",
+     "runInstructions": ["docker build ...", "docker run ...", "curl -f ..."],
+     "filesCreated": ["Dockerfile", "docker-compose.yml"],
+     "resourceLimits": {{ "memory": "512Mi", "cpu": "0.5" }}
+   }}
+   ```
+4. Finish by calling `mcp__report__submit_report` with all required sections.
 
 ## Deliverable contract
 {contract}
