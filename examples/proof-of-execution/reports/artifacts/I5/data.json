@@ -1,0 +1,59 @@
+{
+  "repoName": "fixture-repo",
+  "generatedAt": "2026-06-18T16:24:50.382962+00:00",
+  "status": "pass",
+  "strategy": "Container image for the detected stack (Dockerfile in repo root if present)",
+  "filesCreated": [
+    "Dockerfile"
+  ],
+  "dockerFiles": [
+    {
+      "path": "Dockerfile",
+      "role": "Run fixture-repo on :8080",
+      "baseImage": "detected from repo"
+    }
+  ],
+  "compose": {
+    "services": [
+      {
+        "name": "fixture-repo",
+        "image": "fixture-repo:local",
+        "ports": [
+          "8080:8080"
+        ]
+      }
+    ]
+  },
+  "healthChecks": [
+    {
+      "name": "Health endpoint",
+      "url": "http://localhost:8080/health",
+      "status": "ok",
+      "response": "{\"status\":\"ok\"}",
+      "latencyMs": 15
+    }
+  ],
+  "healthCheck": {
+    "url": "http://localhost:8080/health",
+    "status": "ok",
+    "response": "{\"status\":\"ok\"}"
+  },
+  "ports": {
+    "app": 8080
+  },
+  "buildSteps": [
+    "docker build -t fixture-repo:local .",
+    "docker run -p 8080:8080 fixture-repo:local"
+  ],
+  "buildOutput": "FROM python:3.12-slim\nWORKDIR /app\nCOPY app/ app/\nCOPY tests/ tests/\nEXPOSE 8080\nCMD [\"python\", \"-c\", \"print('fixture-repo ok')\"]\n",
+  "runOutput": "Service on port 8080",
+  "runInstructions": [
+    "docker build -t fixture-repo:local .",
+    "docker run -p 8080:8080 fixture-repo:local",
+    "curl -f http://localhost:8080/health"
+  ],
+  "resourceLimits": {
+    "memory": "512Mi",
+    "cpu": "0.5"
+  }
+}

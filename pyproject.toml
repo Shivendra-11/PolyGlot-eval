@@ -26,3 +26,8 @@ polyglot-eval = "polyglot_eval.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["polyglot_eval*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"

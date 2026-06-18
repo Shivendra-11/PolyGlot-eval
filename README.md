@@ -183,7 +183,8 @@ PolyGlot-eval/
 │   ├── cli.py                 # Entry point
 │   ├── orchestrator.py        # Task runner
 │   ├── dashboard_builder.py   # Aggregates I1–I6 into dashboard data
-│   ├── generate_all_data.py   # Offline data generator
+│   ├── generate_all_data.py   # Offline data generator (repo-agnostic)
+│   ├── repo_scanner.py        # Static scan: entities, routes, entry points
 │   ├── vercel_deploy.py       # Vercel deploy (polyglot-eval*.vercel.app)
 │   ├── ui_launcher.py         # Vite dev server launcher
 │   ├── tasks/                 # I1–I6 task definitions
@@ -220,6 +221,20 @@ reports/
     I4/service/ ...
     I5/Dockerfile
     I6/fix.patch
+```
+
+### Proof of execution (bundled)
+
+Sample outputs from a real run on the bundled **fixture-repo** (repo-agnostic Python app):
+
+- [`examples/fixture-repo/`](examples/fixture-repo/) — minimal target repo with tests and Dockerfile
+- [`examples/proof-of-execution/reports/`](examples/proof-of-execution/reports/) — committed I1–I6 `data.json` artifacts + `SUMMARY.md`
+
+Regenerate:
+
+```bash
+polyglot-eval generate-data --repo examples/fixture-repo
+cp -R examples/fixture-repo/reports examples/proof-of-execution/
 ```
 
 ---
@@ -265,15 +280,31 @@ Write tasks use a dedicated branch (`polyglot-eval/<task-id>`) and leave `main`/
 ## Development
 
 ```bash
-# Run tests
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run tests (permissions, Mermaid validator, dashboard builder, repo scanner)
 pytest
 
 # Lint
 ruff check . && ruff format .
 
+# Offline repo-agnostic data generation (no AI)
+polyglot-eval generate-data --repo examples/fixture-repo
+
 # Rebuild dashboard after code changes
-polyglot-eval serve-ui --task dashboard --repo /path/to/repo-with-reports
+polyglot-eval serve-ui --task dashboard --repo examples/fixture-repo
 ```
+
+### Test coverage
+
+| Module | Tests |
+|--------|-------|
+| `polyglot_eval/permissions.py` | Hard-deny patterns, UI guard, safe bash, `validate_repo_state` |
+| `polyglot_eval/tools/report_tools.py` | Mermaid structural lint, `submit_report`, `save_artifact` |
+| `polyglot_eval/dashboard_builder.py` | Artifact loading, dashboard aggregation |
+| `polyglot_eval/repo_scanner.py` | Repo-agnostic entity/flow scan on fixture-repo |
+| I3 / I6 kickoffs | Self-contained default prompts (no runtime input required) |
 
 ---
 

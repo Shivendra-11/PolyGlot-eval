@@ -13,7 +13,7 @@ target directory is a git repo with a clean working tree and creates a task bran
 
 from __future__ import annotations
 
-import 
+import re
 import subprocess
 from pathlib import Path
 from typing import Callable

@@ -95,6 +95,8 @@ credentials.json
 
 # ── polyglot-eval runtime output (when eval runs against this repo) ───────────
 reports/
+!examples/proof-of-execution/reports/
+!examples/proof-of-execution/reports/**
 
 # ── IDE & editor ──────────────────────────────────────────────────────────────
 .vscode/

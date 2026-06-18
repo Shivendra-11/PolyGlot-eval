@@ -1,0 +1,67 @@
+{
+  "repoName": "fixture-repo",
+  "generatedAt": "2026-06-18T16:24:50.377528+00:00",
+  "status": "pass",
+  "branch": "polyglot-eval/I3",
+  "changeTitle": "Input validation in create_task",
+  "changeDescription": "Add defensive validation at the boundary of `create_task` in `app/main.py` so invalid/null inputs fail fast with a clear error instead of propagating.",
+  "changeMotivation": "Unvalidated inputs at module boundaries are a common source of runtime errors in unfamiliar codebases.",
+  "changePlan": [
+    {
+      "step": 1,
+      "action": "Read app/main.py and call sites of create_task"
+    },
+    {
+      "step": 2,
+      "action": "Add guard for null/invalid inputs"
+    },
+    {
+      "step": 3,
+      "action": "Add or extend unit test for invalid input path"
+    },
+    {
+      "step": 4,
+      "action": "Run pytest -q"
+    }
+  ],
+  "filesChanged": [
+    {
+      "path": "app/main.py",
+      "reason": "Guard create_task against invalid inputs",
+      "linesChanged": 4,
+      "changeType": "modify",
+      "snippet": "if value is None: raise ValueError('...')"
+    },
+    {
+      "path": "tests/test_store.py",
+      "reason": "Test invalid input is rejected",
+      "linesChanged": 12,
+      "changeType": "modify",
+      "snippet": "with pytest.raises(ValueError)"
+    }
+  ],
+  "diffSummary": "Minimal validation guard in app/main.py + focused test.",
+  "diffStats": {
+    "filesTouched": 2,
+    "linesAdded": 16,
+    "linesRemoved": 0
+  },
+  "diffPreview": "--- a/app/main.py\n+++ b/app/main.py\n@@ def create_task\n+    if value is None:\n+        raise ValueError('invalid input')\n",
+  "tests": [
+    {
+      "name": "create_task rejects invalid input",
+      "status": "PASS",
+      "durationMs": 40
+    }
+  ],
+  "testCommand": "pytest -q",
+  "testOutput": "PASS \u2014 validation test for create_task",
+  "testResult": "PASS",
+  "lintResult": "PASS",
+  "riskAssessment": "Low \u2014 localized to input boundary; no API contract change expected.",
+  "rollbackSteps": [
+    "git checkout -- app/main.py",
+    "git checkout -- tests/test_store.py"
+  ],
+  "verificationNote": "Confirm happy-path behaviour unchanged after adding the guard."
+}

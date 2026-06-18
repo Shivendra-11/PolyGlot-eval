@@ -1,0 +1,107 @@
+{
+  "repoName": "fixture-repo",
+  "generatedAt": "2026-06-18T16:24:50.346980+00:00",
+  "status": "pass",
+  "entityCount": 2,
+  "relationshipCount": 1,
+  "mermaidDiagram": "erDiagram\n    Task {\n        string id PK\n        string title\n        string done\n        string _tasks\n        string task\n        string total\n    }\n    TaskStore {\n        string _tasks\n        string task\n        string total\n    }\n    Task }o--o{ TaskStore : \"relates_to\"",
+  "entities": [
+    {
+      "name": "Task",
+      "sourceFile": "app/store.py",
+      "sourceLine": 9,
+      "columns": [
+        {
+          "name": "id",
+          "type": "string",
+          "isPK": true,
+          "isFK": false,
+          "references": null
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        },
+        {
+          "name": "done",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        },
+        {
+          "name": "_tasks",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        },
+        {
+          "name": "task",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        },
+        {
+          "name": "total",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        }
+      ]
+    },
+    {
+      "name": "TaskStore",
+      "sourceFile": "app/store.py",
+      "sourceLine": 16,
+      "columns": [
+        {
+          "name": "_tasks",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        },
+        {
+          "name": "task",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        },
+        {
+          "name": "total",
+          "type": "string",
+          "isPK": false,
+          "isFK": false,
+          "references": null
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Task",
+      "to": "TaskStore",
+      "type": "inferred",
+      "label": "relates_to",
+      "sourceFile": "app/store.py",
+      "sourceLine": 9
+    }
+  ],
+  "routesDiscovered": [],
+  "actionsDiscovered": [
+    "app/main.py::create_task",
+    "app/main.py::list_tasks",
+    "app/main.py::stats",
+    "tests/test_store.py::test_add_rejects_empty_title",
+    "tests/test_store.py::test_add_task",
+    "tests/test_store.py::test_average_title_length"
+  ],
+  "scanNote": "Scanned 4 source files (repo-agnostic)"
+}

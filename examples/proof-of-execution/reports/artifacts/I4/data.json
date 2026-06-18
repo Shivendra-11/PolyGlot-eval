@@ -1,0 +1,75 @@
+{
+  "repoName": "fixture-repo",
+  "generatedAt": "2026-06-18T16:24:50.379897+00:00",
+  "status": "pass",
+  "serviceSummary": "FastAPI POST /convert + GET /health with Pydantic validation and CORS.",
+  "clientSummary": "Node CLI calls the service and prints formatted output.",
+  "uiSummary": "React Vite UI for live conversion against the local API.",
+  "stack": {
+    "backend": "Python + FastAPI",
+    "client": "Node.js",
+    "ui": "React + Vite"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/convert",
+      "request": {
+        "amount": "float",
+        "from": "str",
+        "to": "str"
+      },
+      "response": {
+        "converted": "float",
+        "rate": "float"
+      },
+      "errors": [
+        "422 invalid input"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "response": {
+        "status": "ok"
+      }
+    }
+  ],
+  "currencies": [
+    "USD",
+    "EUR",
+    "GBP",
+    "JPY",
+    "INR"
+  ],
+  "artifacts": [
+    "service/main.py",
+    "service/requirements.txt",
+    "service/test_service.py",
+    "client/index.js",
+    "ui/package.json",
+    "ui/src/App.jsx"
+  ],
+  "tests": {
+    "service": {
+      "command": "pytest service/test_service.py -v",
+      "passed": 4,
+      "failed": 0
+    },
+    "client": {
+      "command": "bash client/test_client.sh",
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "testOutput": "pytest + client script (when I4 artifacts exist)",
+  "runInstructions": [
+    "cd reports/artifacts/I4/service && uvicorn main:app --port 8000",
+    "cd reports/artifacts/I4/ui && npm run dev"
+  ],
+  "architectureDiagram": "flowchart LR\n    UI[React UI :5173] -->|POST /convert| API[FastAPI :8000]\n    CLI[Node CLI] -->|POST /convert| API\n    API --> Rates[(Hardcoded FX rates)]\n    API --> Val[Pydantic validation]",
+  "ports": {
+    "api": 8000,
+    "ui": 5173
+  }
+}

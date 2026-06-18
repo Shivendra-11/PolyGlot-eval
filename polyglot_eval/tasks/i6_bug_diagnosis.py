@@ -5,6 +5,7 @@ implements a minimal fix on a dedicated branch, and verifies the fix with tests.
 """
 
 from .base import Deliverable, TaskSpec
+from .i6_defaults import DEFAULT_I6_BUG
 
 _SYSTEM_PROMPT = """\
 You are a senior debugging engineer. Your job is to reproduce a reported bug, find the root
@@ -121,7 +122,7 @@ SPEC = TaskSpec(
     system_prompt=_SYSTEM_PROMPT.format(
         contract="\n".join(f"- `{d.key}`: {d.label}" for d in _DELIVERABLES)
     ),
-    kickoff=_KICKOFF.format(bug_description="[describe the bug here, or leave blank for auto-detection]"),
+    kickoff=_KICKOFF.format(bug_description=DEFAULT_I6_BUG),
     allowed_tools=["Read", "Grep", "Glob", "Edit", "Bash"],
     permission_mode="default",
     writes_repo=True,

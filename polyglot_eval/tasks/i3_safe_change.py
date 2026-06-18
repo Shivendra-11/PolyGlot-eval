@@ -5,6 +5,7 @@ dedicated branch. Requires operator approval before any write.
 """
 
 from .base import Deliverable, TaskSpec
+from .i3_defaults import DEFAULT_I3_CHANGE
 
 _SYSTEM_PROMPT = """\
 You are a meticulous senior engineer performing a gated, minimal code change in an unfamiliar
@@ -117,7 +118,7 @@ SPEC = TaskSpec(
     system_prompt=_SYSTEM_PROMPT.format(
         contract="\n".join(f"- `{d.key}`: {d.label}" for d in _DELIVERABLES)
     ),
-    kickoff=_KICKOFF.format(change_description="[describe the desired change here, or leave blank for auto-detection]"),
+    kickoff=_KICKOFF.format(change_description=DEFAULT_I3_CHANGE),
     allowed_tools=["Read", "Grep", "Glob", "Edit", "Write", "Bash"],
     permission_mode="default",
     writes_repo=True,

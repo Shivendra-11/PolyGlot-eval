@@ -1,0 +1,81 @@
+{
+  "repoName": "fixture-repo",
+  "generatedAt": "2026-06-18T16:24:50.387448+00:00",
+  "status": "pass",
+  "severity": "medium",
+  "impact": "Incorrect behaviour when `create_task` receives edge-case input",
+  "bugDescription": "Function `create_task` in `app/main.py` may not handle empty/null input correctly, leading to exceptions or wrong results at runtime.",
+  "reproSteps": [
+    {
+      "step": 1,
+      "action": "Call create_task with None or empty input",
+      "expected": "Clear error or safe default"
+    },
+    {
+      "step": 2,
+      "action": "Observe stack trace or wrong output",
+      "actual": "Unhandled edge case"
+    },
+    {
+      "step": 3,
+      "action": "Run pytest -q with failing case",
+      "expected": "Test fails before fix"
+    }
+  ],
+  "timeline": [
+    {
+      "phase": "Reproduce",
+      "durationMin": 5,
+      "outcome": "Failing test or script captured"
+    },
+    {
+      "phase": "Diagnose",
+      "durationMin": 10,
+      "outcome": "Root cause in app/main.py"
+    },
+    {
+      "phase": "Fix",
+      "durationMin": 8,
+      "outcome": "Minimal guard or logic correction"
+    },
+    {
+      "phase": "Verify",
+      "durationMin": 5,
+      "outcome": "Tests pass"
+    }
+  ],
+  "rootCause": {
+    "file": "app/main.py",
+    "line": 1,
+    "function": "create_task",
+    "explanation": "Missing validation or incorrect assumption about input shape at function entry.",
+    "callChain": [
+      "app/main.py::create_task",
+      "callers via grep",
+      "entry route/handler"
+    ]
+  },
+  "fixSummary": "Add input handling in `create_task` and regression test.",
+  "filesChanged": [
+    {
+      "path": "app/main.py",
+      "reason": "Fix edge-case handling",
+      "linesChanged": 6
+    }
+  ],
+  "beforeBehavior": "Edge-case input causes error or incorrect output",
+  "afterBehavior": "Edge-case input handled explicitly with test coverage",
+  "verification": {
+    "command": "pytest -q",
+    "result": "PASS",
+    "output": "Regression test green"
+  },
+  "regressionTests": [
+    {
+      "name": "create_task edge case",
+      "status": "PASS"
+    }
+  ],
+  "fixPreview": "--- a/app/main.py\n+++ b/app/main.py\n@@ create_task\n+ handle empty input\n",
+  "verificationNote": "Run full test suite if time permits."
+}
