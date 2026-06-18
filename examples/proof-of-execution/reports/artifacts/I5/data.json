@@ -1,6 +1,6 @@
 {
   "repoName": "fixture-repo",
-  "generatedAt": "2026-06-18T16:24:50.382962+00:00",
+  "generatedAt": "2026-06-18T16:29:54.823495+00:00",
   "status": "pass",
   "strategy": "Container image for the detected stack (Dockerfile in repo root if present)",
   "filesCreated": [

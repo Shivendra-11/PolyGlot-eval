@@ -1,7 +1,7 @@
 {
   "repoName": "fixture-repo",
   "tracedFlow": "app/main.py \u2192 create_task",
-  "generatedAt": "2026-06-18T16:24:50.365243+00:00",
+  "generatedAt": "2026-06-18T16:29:54.815728+00:00",
   "status": "pass",
   "mermaidDiagram": "sequenceDiagram\n    participant Client\n    participant App as fixture-repo\n    participant Handler as create_task\n    participant Store as Data Layer\n\n    Client->>App: /\n    App->>Handler: create_task()\n    Handler->>Store: read/write\n    Store-->>Handler: result\n    Handler-->>App: response\n    App-->>Client: 200 OK",
   "entryPoint": {
@@ -24,7 +24,7 @@
       "index": 2,
       "file": "app/main.py",
       "function": "list_tasks",
-      "line": 15,
+      "line": 17,
       "description": "Callable list_tasks",
       "ioType": null
     },
@@ -32,7 +32,7 @@
       "index": 3,
       "file": "app/main.py",
       "function": "stats",
-      "line": 19,
+      "line": 21,
       "description": "Callable stats",
       "ioType": null
     }

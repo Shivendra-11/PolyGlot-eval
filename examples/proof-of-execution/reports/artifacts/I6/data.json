@@ -1,6 +1,6 @@
 {
   "repoName": "fixture-repo",
-  "generatedAt": "2026-06-18T16:24:50.387448+00:00",
+  "generatedAt": "2026-06-18T16:29:54.827770+00:00",
   "status": "pass",
   "severity": "medium",
   "impact": "Incorrect behaviour when `create_task` receives edge-case input",

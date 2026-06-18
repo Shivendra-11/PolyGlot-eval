@@ -8,6 +8,8 @@ _store = TaskStore()
 
 
 def create_task(title: str) -> dict:
+    if title is None or not isinstance(title, str):
+        raise TypeError("title must be a string")
     task = _store.add(title)
     return {"id": task.id, "title": task.title, "done": task.done}
 

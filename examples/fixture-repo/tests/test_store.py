@@ -22,3 +22,8 @@ def test_average_title_length():
     store.add("ab")
     store.add("abcd")
     assert store.average_title_length() == 3.0
+
+
+def test_average_title_length_empty_store():
+    store = TaskStore()
+    assert store.average_title_length() == 0.0

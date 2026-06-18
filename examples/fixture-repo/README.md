@@ -6,4 +6,4 @@ Minimal Python task store used as a **repo-agnostic** target for polyglot-eval d
 pytest -q
 ```
 
-Known edge case: `TaskStore.average_title_length()` raises on an empty store (intentional for I6 bug-diagnosis demos).
+Known edge case (I6 demo): `TaskStore.average_title_length()` previously raised on empty store — fixed in proof bundle with regression test.

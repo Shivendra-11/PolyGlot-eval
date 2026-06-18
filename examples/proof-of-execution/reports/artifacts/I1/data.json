@@ -1,6 +1,6 @@
 {
   "repoName": "fixture-repo",
-  "generatedAt": "2026-06-18T16:24:50.346980+00:00",
+  "generatedAt": "2026-06-18T16:29:54.786568+00:00",
   "status": "pass",
   "entityCount": 2,
   "relationshipCount": 1,
@@ -99,9 +99,11 @@
     "app/main.py::create_task",
     "app/main.py::list_tasks",
     "app/main.py::stats",
+    "tests/test_main.py::test_create_task_rejects_none",
     "tests/test_store.py::test_add_rejects_empty_title",
     "tests/test_store.py::test_add_task",
-    "tests/test_store.py::test_average_title_length"
+    "tests/test_store.py::test_average_title_length",
+    "tests/test_store.py::test_average_title_length_empty_store"
   ],
-  "scanNote": "Scanned 4 source files (repo-agnostic)"
+  "scanNote": "Scanned 5 source files (repo-agnostic)"
 }

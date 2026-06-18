@@ -228,13 +228,18 @@ reports/
 Sample outputs from a real run on the bundled **fixture-repo** (repo-agnostic Python app):
 
 - [`examples/fixture-repo/`](examples/fixture-repo/) — minimal target repo with tests and Dockerfile
-- [`examples/proof-of-execution/reports/`](examples/proof-of-execution/reports/) — committed I1–I6 `data.json` artifacts + `SUMMARY.md`
+- [`examples/proof-of-execution/reports/`](examples/proof-of-execution/reports/) — committed artifacts:
+  - `SUMMARY.md`, `EXECUTION_LOG.md`, `I1_er_diagram.md` … `I6_bug_diagnosis.md`
+  - `artifacts/I3/diff.patch`, `artifacts/I6/fix.patch`
+  - `artifacts/I4/service/` — FastAPI + **4 pytest tests**
+  - `artifacts/I4/client/` — Node CLI
 
 Regenerate:
 
 ```bash
 polyglot-eval generate-data --repo examples/fixture-repo
-cp -R examples/fixture-repo/reports examples/proof-of-execution/
+python -m polyglot_eval.build_proof_reports
+pytest   # includes integration tests against proof bundle
 ```
 
 ---
@@ -304,7 +309,9 @@ polyglot-eval serve-ui --task dashboard --repo examples/fixture-repo
 | `polyglot_eval/tools/report_tools.py` | Mermaid structural lint, `submit_report`, `save_artifact` |
 | `polyglot_eval/dashboard_builder.py` | Artifact loading, dashboard aggregation |
 | `polyglot_eval/repo_scanner.py` | Repo-agnostic entity/flow scan on fixture-repo |
+| `polyglot_eval/build_proof_reports.py` | Generate markdown reports from proof artifacts |
 | I3 / I6 kickoffs | Self-contained default prompts (no runtime input required) |
+| `tests/test_integration.py` | Proof bundle + I4 pytest + dashboard integration |
 
 ---
 

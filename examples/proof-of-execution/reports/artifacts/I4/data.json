@@ -1,6 +1,6 @@
 {
   "repoName": "fixture-repo",
-  "generatedAt": "2026-06-18T16:24:50.379897+00:00",
+  "generatedAt": "2026-06-18T16:29:54.822369+00:00",
   "status": "pass",
   "serviceSummary": "FastAPI POST /convert + GET /health with Pydantic validation and CORS.",
   "clientSummary": "Node CLI calls the service and prints formatted output.",
@@ -43,12 +43,7 @@
     "INR"
   ],
   "artifacts": [
-    "service/main.py",
-    "service/requirements.txt",
-    "service/test_service.py",
-    "client/index.js",
-    "ui/package.json",
-    "ui/src/App.jsx"
+    "data.json"
   ],
   "tests": {
     "service": {

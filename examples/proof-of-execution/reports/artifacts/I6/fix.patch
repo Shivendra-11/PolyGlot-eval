@@ -1,0 +1,13 @@
+--- a/app/store.py
++++ b/app/store.py
+@@ -29,8 +29,10 @@ class TaskStore:
+         return list(self._tasks)
+ 
+     def average_title_length(self) -> float:
+-        """Return average title length — fails on empty store (known edge-case bug)."""
++        """Return average title length; empty store returns 0.0."""
++        if not self._tasks:
++            return 0.0
+         total = sum(len(t.title) for t in self._tasks)
+-        return total / len(self._tasks)  # ZeroDivisionError when empty
++        return total / len(self._tasks)

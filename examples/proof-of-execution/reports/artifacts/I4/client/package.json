@@ -1,0 +1,9 @@
+{
+  "name": "polyglot-i4-client",
+  "version": "1.0.0",
+  "description": "Node CLI for polyglot-eval I4 proof",
+  "main": "index.js",
+  "scripts": {
+    "test": "bash test_client.sh"
+  }
+}
